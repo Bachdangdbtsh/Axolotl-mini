@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import { prisma } from "./config/prisma.js";
+import { userRoutes } from "./modules/users/user_route.js";
 
 export function buildApp() {
   const app = Fastify({
