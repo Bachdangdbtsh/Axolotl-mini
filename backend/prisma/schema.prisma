@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classMembers  ClassMember[]
+  questionBanks QuestionBank[]
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members ClassMember[]
+}
+
+model ClassMember {
+  id      String    @id @default(cuid())
+  userID  String
+  classID String
+  role    classRole
+
+  user  User  @relation(fields: [userID], references: [id])
+  class Class @relation(fields: [classID], references: [id])
+
+  @@unique([userID, classID])
+}
+
+enum classRole {
+  TEACHER
+  STUDENT
+}
+
+model QuestionBank {
+  id        String   @id @default(cuid())
+  name      String
+  ownerID   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner     User       @relation(fields: [ownerID], references: [id])
+  questions Question[]
+}
+
+model Question {
+  id             String   @id @default(cuid())
+  questionBankID String
+  content        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  questionBank QuestionBank @relation(fields: [questionBankID], references: [id])
+}
