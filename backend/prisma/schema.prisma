@@ -16,20 +16,35 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
+  passwordHash  String
+  role  UserRole @default(STUDENT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   classMembers  ClassMember[]
   questionBanks QuestionBank[]
+  assignments   AssignmentTarget[] 
+  attempts      Attempt[]
+  exams         Exam[]
 }
+
+enum UserRole {
+  TEACHER
+  STUDENT
+}
+
+// ==================== CLASSROOM ====================
 
 model Class {
   id        String   @id @default(cuid())
   name      String
+  joinCode  String  @unique
+  description String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   members ClassMember[]
+  assignmentTargets AssignmentTarget[]
 }
 
 model ClassMember {
@@ -64,8 +79,160 @@ model Question {
   id             String   @id @default(cuid())
   questionBankID String
   content        String
+  type           QuestionType
+  difficulty     DifficultyType @default(THONG_HIEU)
+  points         Int @default(1)
+  correctAnswer  String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   questionBank QuestionBank @relation(fields: [questionBankID], references: [id])
+  options      QuestionOption[]
+  examQuestions ExamQuestion[]
+}
+
+enum QuestionType {
+  TRAC_NGHIEM
+  DUNG_SAI
+  SHORT_ANSWER
+  ESSAY
+}
+
+enum DifficultyType {
+  NHAN_BIET
+  THONG_HIEU
+  VAN_DUNG
+  VAN_DUNG_CAO
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionID String
+  label      String   
+  content    String   
+  createdAt  DateTime @default(now())
+
+  question Question @relation(fields: [questionID], references: [id], onDelete: Cascade)
+}
+
+// ==================== EXAM ====================
+
+model Exam {
+  id    String   @id @default(cuid())
+  ownerID     String
+  name  String
+  description   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User     @relation(fields: [ownerID], references: [id])
+  examQuestions   ExamQuestion[]
+  assignments     Assignment[]
+}
+
+model ExamQuestion {
+  id    String   @id @default(cuid())
+  examID  String
+  questionID   String
+  order      Int    @default(0) 
+  points     Int    @default(1) 
+
+  exam     Exam     @relation(fields: [examID], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionID], references: [id])
+  answers Answer[]
+
+  @@unique([examID, questionID])
+}
+
+// ==================== ASSIGNMENT ====================
+
+model Assignment {
+  id    String    @id @default(cuid())
+  examID            String
+  name              String
+  startTime         DateTime?        
+  deadline          DateTime?        
+  duration          Int?             
+  maxAttempts       Int              @default(1) 
+  showResult        Boolean          @default(true) 
+  showCorrectAnswer Boolean          @default(false) 
+  shuffleQuestions  Boolean          @default(false)
+  shuffleOptions    Boolean          @default(false)
+  status            AssignmentStatus @default(BAN_NHAP)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  exam    Exam               @relation(fields: [examID], references: [id])
+  targets AssignmentTarget[]
+  attempts Attempt[]
+}
+
+enum AssignmentStatus {
+  BAN_NHAP
+  CHINH_THUC
+  DA_DONG
+}
+
+model AssignmentTarget {
+  id           String          @id @default(cuid())
+  assignmentID String
+  classID      String?         
+  userID       String?         
+  targetType   AssignmentTargetType
+
+  assignment Assignment @relation(fields: [assignmentID], references: [id], onDelete: Cascade)
+  class      Class?     @relation(fields: [classID], references: [id])
+  user       User?      @relation(fields: [userID], references: [id])
+}
+
+enum AssignmentTargetType {
+  CLASS
+  USER
+}
+
+// ==================== SUBMISSION ====================
+model Attempt {
+  id          String        @id @default(cuid())
+  assignmentID String
+  studentID   String
+  startedAt   DateTime      @default(now())
+  submittedAt DateTime?     
+  status      AttemptStatus @default(DANG_THUC_HIEN)
+
+  assignment Assignment @relation(fields: [assignmentID], references: [id])
+  student    User       @relation(fields: [studentID], references: [id])
+  answers    Answer[]
+  result     Result?
+}
+
+enum AttemptStatus {
+  DANG_THUC_HIEN
+  DA_NOP_BAI
+  HET_HAN
+}
+
+model Answer {
+  id             String   @id @default(cuid())
+  attemptID      String
+  examQuestionID String
+  content        String   
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  attempt      Attempt      @relation(fields: [attemptID], references: [id], onDelete: Cascade)
+  examQuestion ExamQuestion @relation(fields: [examQuestionID], references: [id])
+}
+
+// ==================== GRADING ====================
+model Result {
+  id          String   @id @default(cuid())
+  attemptID   String   @unique
+  score       Float    
+  totalPoints Float    
+  percentage  Float?   
+  gradedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attempt Attempt @relation(fields: [attemptID], references: [id], onDelete: Cascade)
 }

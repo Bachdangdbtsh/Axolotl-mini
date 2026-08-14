@@ -1,6 +1,5 @@
 // Day la file quy dinh logic xu ly cho User
 
-import { error } from "node:console";
 import { UserRepository } from "./user_repository.js";
 
 export class UserService {
@@ -10,8 +9,8 @@ export class UserService {
     
     async createUser(data: {
         name: string,
-        email: string, 
-        passwordHashed: string,
+        email: string,
+        passwordHash: string,
         role: "TEACHER" | "STUDENT"
     }) {
         const existingUser = await this.userRepository.findByEmail(data.email);
@@ -22,7 +21,7 @@ export class UserService {
     }
 
     async getUserByID(id: string) {
-        const user = this.userRepository.findByID(id);
+        const user = await this.userRepository.findByID(id);
 
         if (!user) {
             throw new Error(`Không tìm thấy người dùng ID: ${id}`)

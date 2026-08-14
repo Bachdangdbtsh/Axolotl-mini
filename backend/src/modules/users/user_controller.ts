@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { UserService } from "./user_service.js";
+import type { AuthenticatedRequest } from "../users/auth_middleware.js";
 
 export class UserController {
     
@@ -15,6 +16,17 @@ export class UserController {
 
         const user = await this.userService.getUserByID(id);
 
+        return reply.send(user);
+    }
+
+    async getMe(
+    request: AuthenticatedRequest,
+    reply: FastifyReply
+    ) {
+        if (!request.user) {
+            return reply.status(401).send({ error: "Chưa xác thực!" });
+        }
+        const user = await this.userService.getUserByID(request.user.userId);
         return reply.send(user);
     }
 }
