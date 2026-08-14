@@ -1,13 +1,16 @@
 import Fastify from "fastify";
 import { userRoutes } from "./modules/users/user_route.js";
 import { authRoutes } from "./modules/users/auth/auth_route.js";
+import { classRoutes } from "./modules/class/class_route.js";
+
 export function buildApp() {
   const app = Fastify({
     logger: true,
   });
 
   app.register(userRoutes, { prefix: "/users" });
-  app.register(authRoutes, { prefix: "/auth"})
+  app.register(authRoutes, { prefix: "/auth" });
+  app.register(classRoutes, { prefix: "/classes" });
 
   return app;
 }
