@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { UserService } from "./user_service.js";
-import type { AuthenticatedRequest } from "../users/auth_middleware.js";
+import type { AuthenticatedRequest } from "../users/auth/auth_middleware.js";
 
 export class UserController {
     

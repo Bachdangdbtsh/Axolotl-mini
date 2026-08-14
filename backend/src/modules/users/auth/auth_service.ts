@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserRepository } from "../users/user_repository.js";
-import { env } from "../../config/env.js";
+import { UserRepository } from "../user_repository.js";
+import { env } from "../../../config/env.js";
 
 export class AuthService {
     constructor(private userRepository: UserRepository) {}
@@ -19,8 +19,8 @@ export class AuthService {
         }
 
         // Validate password length
-        if (data.password.length < 6) {
-            throw new Error("Mật khẩu phải có ít nhất 6 ký tự!");
+        if (data.password.length < 8) {
+            throw new Error("Mật khẩu phải có ít nhất 8 ký tự!");
         }
 
         // Check email exists

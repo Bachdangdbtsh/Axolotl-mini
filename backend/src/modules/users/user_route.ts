@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { UserController } from "./user_controller.js";
 import { UserService } from "./user_service.js";
 import { UserRepository } from "./user_repository.js";
-import { authMiddleware } from "../users/auth_middleware.js";
+import { authMiddleware } from "../users/auth/auth_middleware.js";
 import { request } from "node:http";
 
 

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { AuthController } from "./auth_controller.js";
 import { AuthService } from "./auth_service.js";
-import { UserRepository } from "../users/user_repository.js";
+import { UserRepository } from "../user_repository.js";
 
 export async function authRoutes(app: FastifyInstance) {
     const userRepository = new UserRepository();
