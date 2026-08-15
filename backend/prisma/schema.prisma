@@ -94,8 +94,8 @@ model Question {
 enum QuestionType {
   TRAC_NGHIEM
   DUNG_SAI
-  SHORT_ANSWER
-  ESSAY
+  TRA_LOI_NGAN
+  TU_LUAN
 }
 
 enum DifficultyType {

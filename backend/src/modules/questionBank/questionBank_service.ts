@@ -12,11 +12,14 @@ export class QuestionBankService {
         return this.questionBankRepository.createQuestionBank(data);
     }
 
-    async getQuestionBankByID(id: string) {
+    async getQuestionBankByID(id: string, userID: string) {
         const questionBank = await this.questionBankRepository.findByID(id);
 
         if (!questionBank) {
             throw new Error("Không tìm thấy ngân hàng câu hỏi!");
+        }
+        if (questionBank.ownerID !== userID) {
+            throw new Error("Bạn không có quyền xem ngân hàng này!");
         }
         return questionBank;
     }
