@@ -49,7 +49,7 @@ export class QuestionService {
             throw new Error("Không tìm thấy câu hỏi");
         }
 
-        const questionBank = await this.questionBankRepository.findByID(question.id);
+        const questionBank = await this.questionBankRepository.findByID(question.questionBankID);
         if (!questionBank) {
             throw new Error("Không tìm thấy ngân hàng câu hỏi");
         }
@@ -113,9 +113,9 @@ export class QuestionService {
             throw new Error("Không tìm thấy câu hỏi!");
         }
         
-        const questionBank = await this.questionBankRepository.findByID(question.id);
+        const questionBank = await this.questionBankRepository.findByID(question.questionBankID);
         if (!questionBank || questionBank.ownerID !== userID) {
-            throw new Error("Bạn không có quyền thêm câu hỏi vào ngân hàng này!");
+            throw new Error("Bạn không có quyền xoá câu hỏi khỏi ngân hàng này!");
         }
         return this.questionRepository.deleteQuestion(id);
     }
