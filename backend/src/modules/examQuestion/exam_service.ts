@@ -56,9 +56,12 @@ export class ExamService {
         if (exam.ownerID != userID) {
             throw new Error("Bạn không có quyền xoá bài kiểm tra này!");
         }
-        await this.examQuestionRepository.deleteExamQuestion(id);
+        await this.examQuestionRepository.deleteByExamID(id);
+    
         return this.examRepository.deleteExam(id);
     }
+
+    
 
     // ExamQuestion methods
     async addQuestionToExam(userID: string, data: {
@@ -75,7 +78,7 @@ export class ExamService {
             throw new Error("Bạn không có quyền thêm câu hỏi vào bài kiểm tra này!");
         }
 
-        const question = await this.examQuestionRepository.findByID(data.questionID);
+        const question = await this.questionRepository.findByID(data.questionID);
         if (!question) {
             throw new Error("Không tìm thấy câu hỏi");
         }

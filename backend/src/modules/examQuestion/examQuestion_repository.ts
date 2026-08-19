@@ -52,4 +52,10 @@ export class ExamQuestionRepository {
     async deleteExamQuestion(id: string) {
         return prisma.examQuestion.delete({ where: {id} });
     }
+
+    async deleteByExamID(examID: string) {
+    return prisma.examQuestion.deleteMany({
+        where: { examID },
+    });
+}
 }

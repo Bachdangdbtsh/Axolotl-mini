@@ -49,5 +49,5 @@ export class ExamRepository {
             where: {id}
         });
     }
-    
+   
 }
