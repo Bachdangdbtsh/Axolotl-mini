@@ -22,7 +22,7 @@ export class ExamQuestionRepository {
         });
     }
 
-    async findExamAndQuestion(examID: string, questionID: string) {
+    async findByExamAndQuestion(examID: string, questionID: string) {
         return prisma.examQuestion.findUnique( {
             where: {
                 examID_questionID: {examID, questionID}
@@ -40,8 +40,6 @@ export class ExamQuestionRepository {
     }
 
     async updateExamQuestion(id: string, data: {
-        examID: string,
-        questionID: string,
         order: number,
         points: number
     }) {
