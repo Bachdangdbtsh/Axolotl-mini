@@ -5,6 +5,7 @@ import { classRoutes } from "./modules/class/class_route.js";
 import { questionBankRoutes } from "./modules/questionBank/questionBank_route.js";
 import { questionRoutes } from "./modules/question/question_route.js";
 import { examRoutes } from "./modules/examQuestion/exam_route.js";
+import { assignmentRoutes } from "./modules/assignment/assignment_route.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -17,5 +18,6 @@ export function buildApp() {
   app.register(questionBankRoutes, {prefix: "/question_banks"});
   app.register(questionRoutes, {prefix: "/questions"});
   app.register(examRoutes, {prefix: "/exams"});
+  app.register(assignmentRoutes, {prefix: "/assignments"});
   return app;
 }
