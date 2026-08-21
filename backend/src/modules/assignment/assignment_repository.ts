@@ -1,22 +1,23 @@
-import {prisma} from "../../config/prisma.js"
+import { prisma } from "../../config/prisma.js";
 
 export class AssignmentRepository {
     async findByID(id: string) {
         return prisma.assignment.findUnique({
-            where: {id},
+            where: { id },
             include: {
                 exam: {
                     include: {
                         examQuestions: {
                             include: { 
-                                question: { include: { options: true } } },
+                                question: { include: { options: true } } 
+                            },
                             orderBy: { order: "asc" },
                         },
                     },
                 },
                 targets: true,
                 attempts: true,
-            }
+            },
         });
     }
 
@@ -26,9 +27,9 @@ export class AssignmentRepository {
                 exam: { ownerID: teacherID },
             },
             include: {
-                exam: {select: {id: true, name: true}},
+                exam: { select: { id: true, name: true } },
                 targets: true,
-                _count: {select: {attempts: true}},
+                _count: { select: { attempts: true } },
             },
         });
     }
@@ -64,65 +65,51 @@ export class AssignmentRepository {
                 status: "CHINH_THUC",
             },
             include: {
-                exam: {
-                    select: {id: true, name: true}
-                },
-                attempts: {
-                    where: {studentID}
-                }
-            }
+                exam: { select: { id: true, name: true } },
+                attempts: { where: { studentID } },
+            },
         });
     }
 
     async createAssignment(data: {
-        examID: string,
-        name: string,
-        startTime?: Date | undefined,
-        deadLine?: Date | undefined,
-        duration?: number | undefined,
-        maxAttempt: number,
-        showResult: boolean,
-        showCorrectAnswers: boolean,
-        shuffleQuestions: boolean,
-        shuffleOptions: boolean
+        examID: string;
+        name: string;
+        startTime?: Date;
+        deadline?: Date;           
+        duration?: number;
+        maxAttempts: number;       
+        showResult: boolean;
+        showCorrectAnswer: boolean; 
+        shuffleQuestions: boolean;
+        shuffleOptions: boolean;
     }) {
         return prisma.assignment.create({
             data: {
-                examID: data.examID,
-                name: data.name,
-                ...(data.startTime !== undefined ? {startTime: data.startTime} : {}),
-                ...(data.deadLine !== undefined ? {deadLine: data.deadLine} : {}),
-                ...(data.duration !== undefined ? {duration: data.duration} : {}),
-                maxAttempt: data.maxAttempt,
-                showResult: data.showResult,
-                showCorrectAnswers: data.showCorrectAnswers,
-                shuffleQuestions: data.shuffleQuestions,
-                shuffleOptions: data.shuffleOptions,
-                status: "BAN_NHAP"
-            }
+                ...data,
+                status: "BAN_NHAP",
+            },
         });
     }
 
     async updateAssignment(id: string, data: {
-        name: string,
-        startTime?: Date,
-        deadLine?: Date,
-        duration?: number,
-        maxAttempt: number,
-        showResult: boolean,
-        showCorrectAnswers: boolean,
-        shuffleQuestions: boolean,
-        shuffleOptions: boolean
+        name?: string;
+        startTime?: Date;
+        deadline?: Date;           
+        duration?: number;
+        maxAttempts?: number;     
+        showResult?: boolean;
+        showCorrectAnswer?: boolean; 
+        shuffleQuestions?: boolean;
+        shuffleOptions?: boolean;
+        status?: "BAN_NHAP" | "CHINH_THUC" | "DA_DONG";
     }) {
         return prisma.assignment.update({
-            where: {id},
+            where: { id },
             data,
         });
     }
 
     async deleteAssignment(id: string) {
-        return prisma.assignment.delete({
-            where: {id},
-        });
+        return prisma.assignment.delete({ where: { id } });
     }
 }

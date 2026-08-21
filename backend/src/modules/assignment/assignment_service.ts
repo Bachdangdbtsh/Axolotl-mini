@@ -8,8 +8,8 @@ export class AssignmentService {
     constructor(
         private assignmentRepository: AssignmentRepository,
         private assignmentTargetRepository: AssignmentTargetRepository,
-        private examRepository: ExamRepository
-    ) {};
+        private examRepository: ExamRepository,
+    ) {}
 
     async createAssignment(teacherID: string, data: {
         examID: string;
@@ -19,11 +19,10 @@ export class AssignmentService {
         duration?: number;
         maxAttempts?: number;
         showResult?: boolean;
-        showCorrectAnswers?: boolean;
+        showCorrectAnswer?: boolean;
         shuffleQuestions?: boolean;
         shuffleOptions?: boolean;
     }) {
-        // Kiểm tra exam tồn tại và thuộc về teacher
         const exam = await this.examRepository.findByID(data.examID);
         if (!exam) {
             throw new Error("Không tìm thấy đề thi!");
@@ -35,12 +34,12 @@ export class AssignmentService {
         return this.assignmentRepository.createAssignment({
             examID: data.examID,
             name: data.name,
-            startTime: data.startTime,
-            deadLine: data.deadline,
-            duration: data.duration,
-            maxAttempt: data.maxAttempts ?? 1,
+            ...(data.startTime !== undefined && { startTime: data.startTime }),
+            ...(data.deadline !== undefined && { deadline: data.deadline }),
+            ...(data.duration !== undefined && { duration: data.duration }),
+            maxAttempts: data.maxAttempts ?? 1,
             showResult: data.showResult ?? true,
-            showCorrectAnswers: data.showCorrectAnswers ?? false,
+            showCorrectAnswer: data.showCorrectAnswer ?? false,
             shuffleQuestions: data.shuffleQuestions ?? false,
             shuffleOptions: data.shuffleOptions ?? false,
         });
@@ -51,7 +50,7 @@ export class AssignmentService {
         if (!assignment) {
             throw new Error("Không tìm thấy lần giao bài nào!");
         }
-        
+
         if (userRole === classRole.TEACHER) {
             if (assignment.exam.ownerID !== userID) {
                 throw new Error("Bạn không có quyền xem bài giao này!");
@@ -59,16 +58,15 @@ export class AssignmentService {
             return assignment;
         }
 
-        // Hoc vien chi duoc xem bai ma minh duoc giao (assignmentTarget)
         if (userRole === classRole.STUDENT) {
-            const isTargeted = this.isStudentTargeted(assignment.id, userID);
+            const isTargeted = await this.isStudentTargeted(assignment.id, userID);
             if (!isTargeted) {
                 throw new Error("Bạn không được giao bài này!");
             }
 
             if (assignment.startTime && new Date() < assignment.startTime) {
                 throw new Error("Bài giao chưa được giao!");
-            } 
+            }
             if (assignment.deadline && new Date() > assignment.deadline) {
                 throw new Error("Bài giao đã quá hạn!");
             }
@@ -84,26 +82,25 @@ export class AssignmentService {
         if (userRole === classRole.STUDENT) {
             return this.assignmentRepository.listByStudent(userID);
         }
-
         throw new Error("Vai trò không hợp lệ!");
     }
 
     async updateAssignment(id: string, userID: string, data: {
-        name: string,
-        startTime?: Date,
-        deadLine?: Date,
-        duration?: number,
-        maxAttempt: number,
-        showResult: boolean,
-        showCorrectAnswers: boolean,
-        shuffleQuestions: boolean,
-        shuffleOptions: boolean
+        name?: string;
+        startTime?: Date;
+        deadline?: Date;           
+        duration?: number;
+        maxAttempts?: number;      
+        showResult?: boolean;
+        showCorrectAnswer?: boolean;  
+        shuffleQuestions?: boolean;
+        shuffleOptions?: boolean;
+        status?: "BAN_NHAP" | "CHINH_THUC" | "DA_DONG";
     }) {
         const assignment = await this.assignmentRepository.findByID(id);
         if (!assignment) {
             throw new Error("Không tìm thấy bài giao!");
         }
-
         if (assignment.exam.ownerID !== userID) {
             throw new Error("Bạn không có quyền chỉnh sửa bài giao này!");
         }
@@ -115,16 +112,15 @@ export class AssignmentService {
         if (!assignment) {
             throw new Error("Không tìm thấy bài giao!");
         }
-
         if (assignment.exam.ownerID !== userID) {
-            throw new Error("Bạn không có quyền chỉnh sửa bài giao này!");
+            throw new Error("Bạn không có quyền xóa bài giao này!");
         }
+        // Xóa targets trước
+        await this.assignmentTargetRepository.deleteByAssignment(id);
         return this.assignmentRepository.deleteAssignment(id);
     }
 
-    
-    ////// AssignmentTarget
-
+    // AssignmentTarget
     async addTarget(teacherID: string, data: {
         assignmentID: string;
         targetType: "CLASS" | "USER";
@@ -163,24 +159,22 @@ export class AssignmentService {
         return this.assignmentTargetRepository.deleteAssignmentTarget(targetID);
     }
 
-
-    // Helper function cho getAssignmentByID
-    private async isStudentTargeted(assignmentID: string, studentID: string) {
+    // Helper
+    private async isStudentTargeted(assignmentID: string, studentID: string): Promise<boolean> {
         const targets = await this.assignmentTargetRepository.listByAssignment(assignmentID);
-        if (!targets) {
-            throw new Error("Không tìm thấy học viên để giao bài!");
+        if (!targets || targets.length === 0) {
+            return false;
         }
 
         for (const target of targets) {
-            if (target.targetType == "USER" && target.userID == studentID) {
+            if (target.targetType === "USER" && target.userID === studentID) {
                 return true;
             }
-
-            if (target.targetType == "CLASS") {
-                const isMember = await prisma.classMember.findMany({
+            if (target.targetType === "CLASS" && target.classID) {
+                const isMember = await prisma.classMember.findFirst({
                     where: {
                         userID: studentID,
-                        classID: target.classID!,
+                        classID: target.classID,
                     },
                 });
                 if (isMember) return true;

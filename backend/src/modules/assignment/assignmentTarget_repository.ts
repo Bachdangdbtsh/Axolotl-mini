@@ -29,4 +29,10 @@ export class AssignmentTargetRepository {
             where: {id},
         });
     }
+
+    async deleteByAssignment(assignmentID: string) {
+    return prisma.assignmentTarget.deleteMany({
+        where: { assignmentID },
+    });
+}
 }
