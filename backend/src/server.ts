@@ -17,3 +17,7 @@ const start = async () => {
 };
 
 start();
+await app.ready();
+console.log("=== REGISTERED ROUTES ===");
+console.log(app.printRoutes());
+console.log("=========================");

@@ -29,7 +29,7 @@ export class AssignmentController {
             ...(body.duration !== undefined && { duration: body.duration }),
             maxAttempts: body.maxAttempts ?? 1,
             showResult: body.showResult ?? true,
-            showCorrectAnswers: body.showCorrectAnswers ?? false,
+            showCorrectAnswer: body.showCorrectAnswers ?? false,
             shuffleQuestions: body.shuffleQuestions ?? false,
             shuffleOptions: body.shuffleOptions ?? false,
         });
@@ -73,14 +73,16 @@ export class AssignmentController {
 
         const assignment = await this.assignmentService.updateAssignment(id, userId, {
             name: body.name,
-            ...(body.startTime !== undefined && { startTime: new Date(body.startTime) }),
-            ...(body.deadline !== undefined && { deadLine: new Date(body.deadline) }),
+            ...(body.startTime != null && { startTime: new Date(body.startTime) }),
+            ...(body.deadline != null && { deadline: new Date(body.deadline) }),
             ...(body.duration !== undefined && { duration: body.duration }),
-            maxAttempt: body.maxAttempts ?? 1,
+            maxAttempts: body.maxAttempts ?? 1,
             showResult: body.showResult ?? true,
-            showCorrectAnswers: body.showCorrectAnswers ?? false,
+            showCorrectAnswer: body.showCorrectAnswers ?? false,
             shuffleQuestions: body.shuffleQuestions ?? false,
             shuffleOptions: body.shuffleOptions ?? false,
+
+            ...(body.status !== undefined && { status: body.status }),
         });
 
         return reply.send(assignment);

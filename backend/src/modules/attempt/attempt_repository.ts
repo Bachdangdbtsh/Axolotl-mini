@@ -17,6 +17,7 @@ export class AttemptRepository {
         });
     }
 
+    // Ham liet ke danh sach bai giao tuong ung voi 1 student
     async listByAssignmentAndStudent(assignmentID: string, studentID: string) {
         return prisma.attempt.findMany({
             where: { assignmentID, studentID },
@@ -25,6 +26,7 @@ export class AttemptRepository {
         });
     }
 
+    // Ham dem so lan attempt vao assignment cua 1 student
     async countByAssignmentAndStudent(assignmentID: string, studentID: string) {
         return prisma.attempt.count({
             where: {assignmentID, studentID},

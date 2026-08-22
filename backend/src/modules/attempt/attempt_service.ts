@@ -55,9 +55,7 @@ export class AttemptService {
                 question: {
                     content: eq.question.content,
                     type: eq.question.type,
-                    options: assignment.shuffleOptions
-                        ? this.shuffleArray(eq.question.options)
-                        : eq.question.options,
+                    options: assignment.shuffleOptions ? this.shuffleArray(eq.question.options) : eq.question.options,
                 },
             })),
         };
@@ -102,7 +100,7 @@ export class AttemptService {
         }
 
         // Cập nhật status
-        await this.attemptRepository.updateStatus(attemptID, "DA_NOP_BAI");
+        await this.attemptRepository.updateStatus(attemptID, AttemptStatus.DA_NOP_BAI);
 
         // Chấm điểm tự động
         const result = await this.gradeAttempt(attemptID);
